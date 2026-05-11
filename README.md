@@ -4,10 +4,14 @@ Dit project is gericht op het systematisch oplossen van security challenges (zoa
 
 ## 🚀 De Roadmap
 
-### Fase 1: Reconnaissance (Verkenning)
-*   **Doel:** De aanvalsoppervlakte in kaart brengen.
-*   **Focus:** Port scanning, service detectie, directory brute-forcing.
-*   **Tools:** Nmap, Gobuster/Feroxbuster, Custom wrappers.
+### Fase 1: Reconnaissance (De "Solid Base")
+*   **Doel:** Volledige zichtbaarheid van het aanvalsoppervlak en automatische mapping naar kwetsbaarheden.
+*   **Focus:**
+    1.  **Port Discovery:** Snel scannen van alle 65535 poorten.
+    2.  **Service Fingerprinting:** Exacte versies en technologieën identificeren (bijv. Werkzeug, PHP, Flask).
+    3.  **Endpoint Enumeration:** Automatisch ontdekken van API routes en statische mappen.
+    4.  **Vulnerability Mapping:** Gevonden poorten direct koppelen aan gespecialiseerde tools (bijv. HTTP poort -> Verbose-Checker).
+*   **Tools:** Nmap (XML output), Custom Master-Recon Orchestrator.
 
 ### Fase 2: Vulnerability Analysis
 *   **Doel:** Specifieke kwetsbaarheden identificeren (OWASP Top 10).
