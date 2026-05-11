@@ -13,7 +13,7 @@ Dit project is gericht op het systematisch identificeren en exploiteren van kwet
 | **A05: Security Misconfiguration** | Verbose errors, default accounts. | `Verbose-Checker` / `Auth-Bruter` | ✅ Actief |
 | **A06: Outdated Components** | Gebruik van software met bekende CVE's. | `Exploit-Matcher` | ✅ Actief |
 | **A07: Identification & Auth** | Zwakke inlogmechanismen/sessies. | `Auth-Bruter` | ✅ Actief |
-| **A08: Software & Data Integrity** | Supply chain failures, onveilige updates. | `Hunter-SCA` | ⏳ Gepland |
+| **A08: Software & Data Integrity** | Supply chain failures, onveilige updates. | `Hunter-SCA` | ✅ Actief |
 | **A09: Logging & Monitoring** | Gebrek aan detectie van aanvallen. | *Blue Team Scope* | - |
 | **A10: SSRF** | Server-Side Request Forgery. | `SSRF-Scanner` | ⏳ Gepland |
 

@@ -172,6 +172,8 @@ def create_org_report(target_full, xml_file):
                                 action_items.append(f"| CRITICAL | Admin/Login Page found on port {portid} | Run: ~python3 tools/auth_bruter.py {d['url']}~ |")
                             if "api" in d['url']:
                                 action_items.append(f"| MEDIUM | API Endpoint found on port {portid} | Run: ~python3 tools/verbose_checker.py {d['url']}/FUZZ~ |")
+                            if "package.json" in d['url'] or "requirements.txt" in d['url']:
+                                action_items.append(f"| HIGH | Dependency file found on port {portid} | Run: ~python3 tools/hunter_sca.py http://{addr}:{portid}~ |")
                     
                     port_section.append(f"- Recommended Scan:\n#+BEGIN_SRC bash\npython3 tools/verbose_checker.py http://{addr}:{portid}/FUZZ\n#+END_SRC\n")
 
