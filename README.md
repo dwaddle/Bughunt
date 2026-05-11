@@ -8,7 +8,7 @@ Dit project is gericht op het systematisch identificeren en exploiteren van kwet
 | :--- | :--- | :--- | :--- |
 | **A01: Broken Access Control** | Ongeautoriseerde toegang tot data/functies. | `Directory-Scanner` | ✅ Actief |
 | **A02: Cryptographic Failures** | Zwakke encryptie of hardcoded keys. | `Crypto-Audit` | ⏳ Gepland |
-| **A03: Injection** | SQL, NoSQL, OS Command, LFI/RFI injection. | `Injection-Tester` | ⏳ Gepland |
+| **A03: Injection** | SQL, NoSQL, OS Command, LFI/RFI. | `LFI-Scanner`, `SQLi-Tester`, `Cmd-Injection-Tester` | ✅ Actief |
 | **A04: Insecure Design** | Ontwerpfouten in de applicatielogica. | `Recon-Logic` | 📝 In Roadmap |
 | **A05: Security Misconfiguration** | Verbose errors, default accounts. | `Verbose-Checker` / `Auth-Bruter` | ✅ Actief |
 | **A06: Outdated Components** | Gebruik van software met bekende CVE's. | `Exploit-Matcher` | ✅ Actief |
