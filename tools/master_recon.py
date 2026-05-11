@@ -4,6 +4,7 @@ Master-Recon: The orchestrator for the Bughunt reconnaissance phase.
 It runs Nmap, parses the output, and automatically triggers vulnerability-specific tools.
 """
 
+import subprocess
 import requests
 import argparse
 import os
@@ -33,18 +34,23 @@ def get_severity(score):
         return "UNKNOWN", Colors.RESET
 
 def get_cve_description(cve_id):
-    """Fetches a short summary for a CVE ID from CIRCL API."""
+    """Fetches a short summary for a CVE ID from NIST NVD API."""
     try:
-        # Using a timeout to prevent hanging the scan
-        response = requests.get(f"https://cve.circl.lu/api/cve/{cve_id}", timeout=3)
+        # NIST NVD API v2
+        url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
-            summary = data.get('summary', 'No description available.')
-            # Truncate summary for readability
-            return (summary[:100] + '...') if len(summary) > 100 else summary
-    except:
+            vulnerabilities = data.get('vulnerabilities', [])
+            if vulnerabilities:
+                descriptions = vulnerabilities[0].get('cve', {}).get('descriptions', [])
+                for desc in descriptions:
+                    if desc.get('lang') == 'en':
+                        summary = desc.get('value', 'No description available.')
+                        return (summary[:150] + '...') if len(summary) > 150 else summary
+    except Exception as e:
         pass
-    return "Description lookup failed or timed out."
+    return "Description lookup failed or unavailable for this CVE."
 
 def parse_vulners_output(output):
     """Parses vulners output and returns formatted lines with severity and descriptions."""
@@ -188,9 +194,6 @@ def main():
         print(f"\n[*] Reconnaissance phase completed. Review {report_file}")
     except Exception as e:
         print(f"[x] Critical Error: {e}")
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
