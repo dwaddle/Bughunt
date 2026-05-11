@@ -13,16 +13,15 @@
 - Version: 3.1.3
 - Potential CVEs:
 #+BEGIN_EXAMPLE
-
-  cpe:/a:python:python:3.11.14: 
-    	VERACODE:43894	9.8	https://vulners.com/veracode/VERACODE:43894
-    	875939FB-9777-5987-AFC3-AF9415D4A294	9.8	https://vulners.com/githubexploit/875939FB-9777-5987-AFC3-AF9415D4A294	*EXPLOIT*
-    	2C9F6234-51AA-5233-BB11-B19ADC668F01	9.8	https://vulners.com/githubexploit/2C9F6234-51AA-5233-BB11-B19ADC668F01	*EXPLOIT*
-    	CVE-2025-13836	7.5	https://vulners.com/cve/CVE-2025-13836
-    	CVE-2026-4519	7.0	https://vulners.com/cve/CVE-2026-4519
-    	CVE-2025-12781	6.3	https://vulners.com/cve/CVE-2025-12781
-    	CVE-2025-12084	6.3	https://vulners.com/cve/CVE-2025-12084
-    	CVE-2025-13837	5.5	https://vulners.com/cve/CVE-2025-13837
+      cpe:/a:python:python:3.11.14:
+      VERACODE:43894	9.8	https://vulners.com/veracode/VERACODE:43894
+      875939FB-9777-5987-AFC3-AF9415D4A294	9.8	https://vulners.com/githubexploit/875939FB-9777-5987-AFC3-AF9415D4A294	*EXPLOIT*
+      2C9F6234-51AA-5233-BB11-B19ADC668F01	9.8	https://vulners.com/githubexploit/2C9F6234-51AA-5233-BB11-B19ADC668F01	*EXPLOIT*
+      [HIGH] CVE-2025-13836 (Score: 7.5)
+      [HIGH] CVE-2026-4519 (Score: 7.0)
+      [MEDIUM] CVE-2025-12781 (Score: 6.3)
+      [MEDIUM] CVE-2025-12084 (Score: 6.3)
+      [MEDIUM] CVE-2025-13837 (Score: 5.5)
 #+END_EXAMPLE
 - Exploit Matcher Output:
 #+BEGIN_EXAMPLE

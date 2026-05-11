@@ -4,12 +4,13 @@ Master-Recon: The orchestrator for the Bughunt reconnaissance phase.
 It runs Nmap, parses the output, and automatically triggers vulnerability-specific tools.
 """
 
-import subprocess
+import requests
 import argparse
 import os
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import time
 
 # ANSI Color Codes
 class Colors:
@@ -18,6 +19,7 @@ class Colors:
     MEDIUM = '\033[93m'          # Yellow
     LOW = '\033[92m'             # Green
     INFO = '\033[94m'            # Blue
+    DIM = '\033[90m'             # Gray
     RESET = '\033[0m'
 
 def get_severity(score):
@@ -30,27 +32,59 @@ def get_severity(score):
     except:
         return "UNKNOWN", Colors.RESET
 
+def get_cve_description(cve_id):
+    """Fetches a short summary for a CVE ID from CIRCL API."""
+    try:
+        # Using a timeout to prevent hanging the scan
+        response = requests.get(f"https://cve.circl.lu/api/cve/{cve_id}", timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            summary = data.get('summary', 'No description available.')
+            # Truncate summary for readability
+            return (summary[:100] + '...') if len(summary) > 100 else summary
+    except:
+        pass
+    return "Description lookup failed or timed out."
+
 def parse_vulners_output(output):
-    """Parses vulners output and returns a list of formatted lines with severity."""
+    """Parses vulners output and returns formatted lines with severity and descriptions."""
     lines = output.split('\n')
     formatted_console = []
     formatted_report = []
     
+    # Track CVEs to avoid duplicates and limit API calls
+    seen_cves = set()
+    cve_count = 0
+    
     for line in lines:
-        # Regex to find CVE and Score (e.g., CVE-2021-1234  7.5)
         match = re.search(r'(CVE-\d{4}-\d+)\s+(\d+\.?\d*)', line)
         if match:
             cve_id = match.group(1)
             score = match.group(2)
+            
+            if cve_id in seen_cves: continue
+            seen_cves.add(cve_id)
+            cve_count += 1
+            
             label, color = get_severity(score)
             
+            # Fetch description only for top 5 to keep it fast
+            description = ""
+            if cve_count <= 5:
+                description = get_cve_description(cve_id)
+            
             console_line = f"      {color}[{label}] {cve_id} (Score: {score}){Colors.RESET}"
+            if description:
+                console_line += f"\n      {Colors.DIM}>> {description}{Colors.RESET}"
+            
             report_line = f"      [{label}] {cve_id} (Score: {score})"
+            if description:
+                report_line += f"\n      >> {description}"
             
             formatted_console.append(console_line)
             formatted_report.append(report_line)
         else:
-            if line.strip():
+            if line.strip() and "http" not in line: # Filter out raw URLs
                 formatted_console.append(f"      {line.strip()}")
                 formatted_report.append(f"      {line.strip()}")
                 
