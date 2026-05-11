@@ -15,15 +15,17 @@
 #+BEGIN_EXAMPLE
       cpe:/a:python:python:3.11.14:
       [HIGH] CVE-2025-13836 (Score: 7.5)
-      >> No description available.
+      >> Description lookup failed or unavailable for this CVE.
       [HIGH] CVE-2026-4519 (Score: 7.0)
-      >> No description available.
+      >> The webbrowser.open() API would accept leading dashes in the URL which 
+could be handled as command line options for certain web browsers. New 
+behavi...
       [MEDIUM] CVE-2025-12781 (Score: 6.3)
-      >> No description available.
+      >> When passing data to the b64decode(), standard_b64decode(), and urlsafe_b64decode() functions in the "base64" module the characters "+/" will always b...
       [MEDIUM] CVE-2025-12084 (Score: 6.3)
-      >> No description available.
+      >> Description lookup failed or unavailable for this CVE.
       [MEDIUM] CVE-2025-13837 (Score: 5.5)
-      >> No description available.
+      >> When loading a plist file, the plistlib module reads data in size specified by the file itself, meaning a malicious file can cause OOM and DoS issues
 #+END_EXAMPLE
 - Exploit Matcher Output:
 #+BEGIN_EXAMPLE
