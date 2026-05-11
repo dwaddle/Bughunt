@@ -11,9 +11,9 @@ import xml.etree.ElementTree as ET
 
 def run_nmap(target):
     xml_file = "nmap_results.xml"
-    print(f"[*] Running Nmap scan on {target}...")
-    # Scan for common ports with service detection and default scripts
-    cmd = f"nmap -sV -sC -T4 -oX {xml_file} {target}"
+    print(f"[*] Running Nmap scan on {target} with CVE detection...")
+    # Scan for common ports with service detection, default scripts AND vulners script
+    cmd = f"nmap -sV --script vulners -T4 -oX {xml_file} {target}"
     subprocess.run(cmd, shell=True, check=True)
     return xml_file
 
