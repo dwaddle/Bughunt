@@ -1,0 +1,7 @@
+Default credentials or weak passwords left unchanged
+Unnecessary services or endpoints exposed to the internet
+Misconfigured cloud storage or permissions (S3, Azure Blob, GCP buckets)
+Unrestricted API access or missing authentication/authorisation
+Verbose error messages exposing stack traces or system details
+Outdated software, frameworks, or containers with known vulnerabilities
+Exposed AI/ML endpoints without proper access controls

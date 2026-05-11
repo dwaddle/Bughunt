@@ -2,6 +2,27 @@
 
 Dit project is gericht op het systematisch oplossen van security challenges (zoals op TryHackMe) en het vertalen van die lessen naar real-world bug hunting scenario's.
 
+## 🎯 Attack Vectors (gebaseerd op klad.txt)
+
+We focussen op de volgende kritieke aanvalspunten:
+
+1.  **Default Credentials:** Zwakke of ongewijzigde wachtwoorden op admin panels.
+    *   *Tooling:* `Auth-Bruter` (gepland)
+2.  **Unnecessary Services:** Onnodige poorten of diensten die openstaan voor het internet.
+    *   *Tooling:* `Master-Recon` (actief)
+3.  **Cloud Misconfigurations:** Onveilig ingestelde S3 buckets of cloud permissies.
+    *   *Tooling:* `Cloud-Auditor` (gepland)
+4.  **Unrestricted API Access:** API's zonder authenticatie of autorisatie controle.
+    *   *Tooling:* `API-Interceptor` (gepland)
+5.  **Verbose Error Messages:** Lekken van stack traces of systeemdetails.
+    *   *Tooling:* `Verbose-Checker` (actief)
+6.  **Outdated Software:** Gebruik van verouderde frameworks met bekende CVE's.
+    *   *Tooling:* `Exploit-Matcher` (actief)
+7.  **Exposed AI/ML Endpoints:** AI-modellen/eindpunten zonder toegangscontrole.
+    *   *Tooling:* `AI-Endpoint-Scanner` (gepland)
+
+---
+
 ## 🚀 De Roadmap
 
 ### Fase 1: Reconnaissance (De "Solid Base")
