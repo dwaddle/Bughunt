@@ -1,0 +1,34 @@
+#+TITLE: Challenge Template
+#+AUTHOR: Rene
+#+DATE: [2026-05-11 Mon]
+
+* Overview
+- Target IP: 
+- Platform: TryHackMe
+- Difficulty: 
+
+* Reconnaissance
+** Nmap Scan
+#+BEGIN_SRC bash
+nmap -sV -sC -T4 $IP
+#+END_SRC
+
+* Vulnerability Analysis
+- [ ] Security Misconfiguration
+- [ ] Supply Chain Failure
+- [ ] Broken Authentication
+
+* Exploitation
+** Steps to Reproduce
+1. 
+2. 
+
+** Payloads
+#+BEGIN_SRC 
+# Voeg hier je payloads toe
+#+END_SRC
+
+* Lessons Learned
+** Tooling Gaps
+- Wat ontbrak er in mijn toolkit?
+- Ideeën voor nieuwe scripts:
