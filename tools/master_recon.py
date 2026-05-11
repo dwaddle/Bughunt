@@ -7,8 +7,54 @@ It runs Nmap, parses the output, and automatically triggers vulnerability-specif
 import subprocess
 import argparse
 import os
+import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
+
+# ANSI Color Codes
+class Colors:
+    CRITICAL = '\033[91m\033[1m' # Bold Red
+    HIGH = '\033[91m'            # Red
+    MEDIUM = '\033[93m'          # Yellow
+    LOW = '\033[92m'             # Green
+    INFO = '\033[94m'            # Blue
+    RESET = '\033[0m'
+
+def get_severity(score):
+    try:
+        s = float(score)
+        if s >= 9.0: return "CRITICAL", Colors.CRITICAL
+        if s >= 7.0: return "HIGH", Colors.HIGH
+        if s >= 4.0: return "MEDIUM", Colors.MEDIUM
+        return "LOW", Colors.LOW
+    except:
+        return "UNKNOWN", Colors.RESET
+
+def parse_vulners_output(output):
+    """Parses vulners output and returns a list of formatted lines with severity."""
+    lines = output.split('\n')
+    formatted_console = []
+    formatted_report = []
+    
+    for line in lines:
+        # Regex to find CVE and Score (e.g., CVE-2021-1234  7.5)
+        match = re.search(r'(CVE-\d{4}-\d+)\s+(\d+\.?\d*)', line)
+        if match:
+            cve_id = match.group(1)
+            score = match.group(2)
+            label, color = get_severity(score)
+            
+            console_line = f"      {color}[{label}] {cve_id} (Score: {score}){Colors.RESET}"
+            report_line = f"      [{label}] {cve_id} (Score: {score})"
+            
+            formatted_console.append(console_line)
+            formatted_report.append(report_line)
+        else:
+            if line.strip():
+                formatted_console.append(f"      {line.strip()}")
+                formatted_report.append(f"      {line.strip()}")
+                
+    return "\n".join(formatted_console), "\n".join(formatted_report)
 
 def run_nmap(target, port=None):
     xml_file = "nmap_results.xml"
@@ -25,7 +71,6 @@ def get_exploits(service, version):
     return result.stdout
 
 def create_org_report(target_full, xml_file):
-    # Make filename safe by replacing dots and colons
     safe_name = target_full.replace('.', '_').replace(':', '_')
     report_path = f"notes/{safe_name}.org"
     tree = ET.parse(xml_file)
@@ -54,6 +99,7 @@ def create_org_report(target_full, xml_file):
                     product = service_elem.get('product', '') if service_elem is not None else ""
                     version = service_elem.get('version', '') if service_elem is not None else ""
                     
+                    print(f"[+] {Colors.INFO}Found Port {portid}{Colors.RESET}: {product} {version}")
                     f.write(f"*** Port {portid}: {service_name}\n")
                     f.write(f"- Product: {product}\n")
                     f.write(f"- Version: {version}\n")
@@ -61,9 +107,13 @@ def create_org_report(target_full, xml_file):
                     # Add CVEs from Nmap
                     script_elem = port_elem.find(".//script[@id='vulners']")
                     if script_elem is not None:
+                        console_cves, report_cves = parse_vulners_output(script_elem.get('output'))
+                        print(f"    - Potential CVEs Found:")
+                        print(console_cves)
+                        
                         f.write("- Potential CVEs:\n")
                         f.write("#+BEGIN_EXAMPLE\n")
-                        f.write(script_elem.get('output'))
+                        f.write(report_cves)
                         f.write("\n#+END_EXAMPLE\n")
                     
                     # Run and add Exploits
@@ -74,7 +124,6 @@ def create_org_report(target_full, xml_file):
                         f.write(exploits)
                         f.write("#+END_EXAMPLE\n")
                     
-                    # Trigger custom vulnerability tools
                     if service_name == "http" or portid in ["5002", "5003", "5004"]:
                         f.write("- Custom Tooling Findings:\n")
                         f.write("#+BEGIN_SRC bash\n")
@@ -82,7 +131,7 @@ def create_org_report(target_full, xml_file):
                         f.write("#+END_SRC\n")
                     f.write("\n")
                     
-    print(f"[+] Report generated: {report_path}")
+    print(f"\n[+] Report generated: {report_path}")
     return report_path
 
 def main():
@@ -93,7 +142,6 @@ def main():
     target = args.target
     port = None
 
-    # Handle IP:Port notation
     if ":" in target:
         target, port = target.split(":", 1)
 
@@ -106,6 +154,9 @@ def main():
         print(f"\n[*] Reconnaissance phase completed. Review {report_file}")
     except Exception as e:
         print(f"[x] Critical Error: {e}")
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
