@@ -1,9 +1,13 @@
 # Project Richtlijnen: Bughunt
 
+## Filosofie: OWASP-Centric Development
+- Elke tool in de `tools/` directory moet direct te herleiden zijn naar ten minste één categorie uit de **OWASP Top 10**.
+- Het doel is om een 'compleet verhaal' te bieden: van het vinden van de service (Recon) tot het identificeren van de specifieke OWASP-kwetsbaarheid.
+
 ## Architectuur & Conventies
-- **Taal:** Python is de voorkeurstaal voor tooling vanwege de snelheid van ontwikkeling en rijke libraries (Requests, Scapy, BeautifulSoup).
-- **Modulariteit:** Elke tool moet als zelfstandige module werken, maar ook geïntegreerd kunnen worden in een groter framework.
-- **Output:** Tools moeten resultaten leveren in zowel leesbare tekst als JSON voor verdere verwerking.
+- **Taal:** Python 3 met een sterke focus op `requests` en `argparse`.
+- **Modulariteit:** Tools moeten standalone kunnen draaien, maar hun resultaten moeten door `Master-Recon` geconsumeerd kunnen worden.
+- **Output:** Standaardiseer op JSON voor data-uitwisseling tussen tools en Org-mode voor menselijke rapportage.
 
 ## Workflow voor Nieuwe Challenges
 1.  **Logboek bijhouden:** Elke THM room of test wordt gedocumenteerd in de `notes/` directory met gebruik van **Emacs Org-mode** (`.org` bestanden).

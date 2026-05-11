@@ -1,56 +1,40 @@
-# Bughunt: Roadmap & Tooling
+# Bughunt: OWASP-Driven Security Toolset
 
-Dit project is gericht op het systematisch oplossen van security challenges (zoals op TryHackMe) en het vertalen van die lessen naar real-world bug hunting scenario's.
+Dit project is gericht op het systematisch identificeren en exploiteren van kwetsbaarheden uit de **OWASP Top 10**. Door voor elke categorie specifieke tools te bouwen, creëren we een compleet verhaal voor zowel CTF's (TryHackMe) als real-world security audits.
 
-## 🎯 Attack Vectors (gebaseerd op klad.txt)
+## 🛡️ OWASP Top 10 Mapping & Tool Status
 
-We focussen op de volgende kritieke aanvalspunten:
-
-1.  **Default Credentials:** Zwakke of ongewijzigde wachtwoorden op admin panels.
-    *   *Tooling:* `Auth-Bruter` (actief)
-2.  **Unnecessary Services:** Onnodige poorten of diensten die openstaan voor het internet.
-    *   *Tooling:* `Master-Recon` (actief)
-3.  **Cloud Misconfigurations:** Onveilig ingestelde S3 buckets of cloud permissies.
-    *   *Tooling:* `Cloud-Auditor` (gepland)
-4.  **Unrestricted API Access:** API's zonder authenticatie of autorisatie controle.
-    *   *Tooling:* `API-Interceptor` (gepland)
-5.  **Verbose Error Messages:** Lekken van stack traces of systeemdetails.
-    *   *Tooling:* `Verbose-Checker` (actief)
-6.  **Outdated Software:** Gebruik van verouderde frameworks met bekende CVE's.
-    *   *Tooling:* `Exploit-Matcher` (actief)
-7.  **Exposed AI/ML Endpoints:** AI-modellen/eindpunten zonder toegangscontrole.
-    *   *Tooling:* `AI-Endpoint-Scanner` (gepland)
+| OWASP Categorie | Beschrijving | Onze Tool | Status |
+| :--- | :--- | :--- | :--- |
+| **A01: Broken Access Control** | Ongeautoriseerde toegang tot data/functies. | `Directory-Scanner` | ✅ Actief |
+| **A02: Cryptographic Failures** | Zwakke encryptie of hardcoded keys. | `Crypto-Audit` | ⏳ Gepland |
+| **A03: Injection** | SQL, NoSQL, OS Command injection. | `Injection-Tester` | ⏳ Gepland |
+| **A04: Insecure Design** | Ontwerpfouten in de applicatielogica. | `Recon-Logic` | 📝 In Roadmap |
+| **A05: Security Misconfiguration** | Verbose errors, default accounts. | `Verbose-Checker` / `Auth-Bruter` | ✅ Actief |
+| **A06: Outdated Components** | Gebruik van software met bekende CVE's. | `Exploit-Matcher` | ✅ Actief |
+| **A07: Identification & Auth** | Zwakke inlogmechanismen/sessies. | `Auth-Bruter` | ✅ Actief |
+| **A08: Software & Data Integrity** | Supply chain failures, onveilige updates. | `Hunter-SCA` | ⏳ Gepland |
+| **A09: Logging & Monitoring** | Gebrek aan detectie van aanvallen. | *Blue Team Scope* | - |
+| **A10: SSRF** | Server-Side Request Forgery. | `SSRF-Scanner` | ⏳ Gepland |
 
 ---
 
-## 🚀 De Roadmap
+## 🔥 Master-Recon Orchestrator
+De `Master-Recon` tool dient als de centrale orchestrator die bovenstaande tools aanstuurt op basis van de gevonden services.
+
+## 🚀 De Roadmap (Fasen)
 
 ### Fase 1: Reconnaissance (De "Solid Base")
-*   **Doel:** Volledige zichtbaarheid van het aanvalsoppervlak en automatische mapping naar kwetsbaarheden.
-*   **Focus:**
-    1.  **Port Discovery:** Snel scannen van alle 65535 poorten.
-    2.  **Service Fingerprinting:** Exacte versies en technologieën identificeren.
-    3.  **CVE & Intelligence:** Automatisch zoeken naar bekende CVE's op basis van versienummers (Nmap vulners, Searchsploit).
-    4.  **Endpoint Enumeration:** Ontdekken van API routes en statische mappen.
-    5.  **Vulnerability Mapping:** Gevonden poorten direct koppelen aan gespecialiseerde tools.
-*   **Tools:** Nmap (XML output), Custom Master-Recon Orchestrator.
+*   **Port Discovery & Service Fingerprinting**
+*   **CVE & Intelligence Integration** (NIST NVD API)
+*   **Actionable Reporting** (Org-mode Action Plan)
 
-### Fase 2: Vulnerability Analysis
-*   **Doel:** Specifieke kwetsbaarheden identificeren (OWASP Top 10).
-*   **Focus:** Misconfiguraties (AS02), Supply Chain (AS03), Broken Auth.
-*   **Tools:** Nuclei, Nikto, Custom scanners.
+### Fase 2: Vulnerability Analysis (OWASP Focused)
+*   Implementatie van de resterende ⏳ tools uit de tabel.
+*   Focus op **Injection (A03)** en **Broken Access Control (A01)**.
 
-### Fase 3: Exploitation
-*   **Doel:** Bewijs van kwetsbaarheid leveren (PoC).
-*   **Focus:** Command Injection, SQLi, Broken Cryptography.
-*   **Tools:** Metasploit, Burp Suite, Custom exploit scripts.
+### Fase 3: Exploitation & PoC
+*   Automatische koppeling met Metasploit of custom exploit scripts.
 
-### Fase 4: Reporting & Automation
-*   **Doel:** Resultaten documenteren en het proces automatiseren.
-*   **Focus:** Scripting van herhaalbare tests.
-
-## 🛠 Eigen Tools in Ontwikkeling
-
-1.  **Hunter-SCA:** Een tool om dependencies te scannen op bekende kwetsbaarheden (gericht op Supply Chain Failures).
-2.  **Verbose-Checker:** Een scanner die specifiek zoekt naar verbose error messages door verschillende types "bad input" te sturen.
-3.  **Crypto-Audit:** Een script dat client-side JS analyseert op hardcoded keys en zwakke algoritmen.
+### Fase 4: Automation & reporting
+*   Volledige CI/CD integratie voor automatische scans.
