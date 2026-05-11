@@ -10,10 +10,11 @@ import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-def run_nmap(target):
+def run_nmap(target, port=None):
     xml_file = "nmap_results.xml"
-    print(f"[*] Running Nmap scan on {target} with CVE detection...")
-    cmd = f"nmap -sV --script vulners -T4 -oX {xml_file} {target}"
+    port_arg = f"-p {port}" if port else ""
+    print(f"[*] Running Nmap scan on {target} {f'port {port}' if port else 'common ports'} with CVE detection...")
+    cmd = f"nmap -sV --script vulners -T4 {port_arg} -oX {xml_file} {target}"
     subprocess.run(cmd, shell=True, check=True)
     return xml_file
 
@@ -23,24 +24,27 @@ def get_exploits(service, version):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return result.stdout
 
-def create_org_report(target, xml_file):
-    report_path = f"notes/{target.replace('.', '_')}.org"
+def create_org_report(target_full, xml_file):
+    # Make filename safe by replacing dots and colons
+    safe_name = target_full.replace('.', '_').replace(':', '_')
+    report_path = f"notes/{safe_name}.org"
     tree = ET.parse(xml_file)
     root = tree.getroot()
     
     with open(report_path, "w") as f:
-        f.write(f"#+TITLE: Recon Report: {target}\n")
+        f.write(f"#+TITLE: Recon Report: {target_full}\n")
         f.write(f"#+AUTHOR: Bughunt Master-Recon\n")
         f.write(f"#+DATE: {datetime.now().strftime('[%Y-%m-%d %a]')}\n\n")
         
         f.write("* Overview\n")
-        f.write(f"- Target IP: {target}\n")
+        f.write(f"- Target: {target_full}\n")
         f.write("- Status: Enumerated\n\n")
         
         f.write("* Reconnaissance\n")
         f.write("** Open Ports & Services\n")
         
         for host in root.findall('host'):
+            addr = host.find('address').get('addr')
             for port_elem in host.findall('.//port'):
                 portid = port_elem.get('portid')
                 state = port_elem.find('state').get('state')
@@ -74,7 +78,7 @@ def create_org_report(target, xml_file):
                     if service_name == "http" or portid in ["5002", "5003", "5004"]:
                         f.write("- Custom Tooling Findings:\n")
                         f.write("#+BEGIN_SRC bash\n")
-                        f.write(f"python3 tools/verbose_checker.py http://{target}:{portid}/FUZZ\n")
+                        f.write(f"python3 tools/verbose_checker.py http://{addr}:{portid}/FUZZ\n")
                         f.write("#+END_SRC\n")
                     f.write("\n")
                     
@@ -83,14 +87,21 @@ def create_org_report(target, xml_file):
 
 def main():
     parser = argparse.ArgumentParser(description="Master-Recon Orchestrator")
-    parser.add_argument("target", help="Target IP or hostname")
+    parser.add_argument("target", help="Target IP, hostname or IP:Port")
     args = parser.parse_args()
+
+    target = args.target
+    port = None
+
+    # Handle IP:Port notation
+    if ":" in target:
+        target, port = target.split(":", 1)
 
     try:
         if not os.path.exists("notes"):
             os.makedirs("notes")
             
-        xml_output = run_nmap(args.target)
+        xml_output = run_nmap(target, port)
         report_file = create_org_report(args.target, xml_output)
         print(f"\n[*] Reconnaissance phase completed. Review {report_file}")
     except Exception as e:

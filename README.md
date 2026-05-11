@@ -7,7 +7,7 @@ Dit project is gericht op het systematisch oplossen van security challenges (zoa
 We focussen op de volgende kritieke aanvalspunten:
 
 1.  **Default Credentials:** Zwakke of ongewijzigde wachtwoorden op admin panels.
-    *   *Tooling:* `Auth-Bruter` (gepland)
+    *   *Tooling:* `Auth-Bruter` (actief)
 2.  **Unnecessary Services:** Onnodige poorten of diensten die openstaan voor het internet.
     *   *Tooling:* `Master-Recon` (actief)
 3.  **Cloud Misconfigurations:** Onveilig ingestelde S3 buckets of cloud permissies.
