@@ -8,6 +8,7 @@ import subprocess
 import requests
 import argparse
 import os
+import sys
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -218,6 +219,5 @@ def main():
     except Exception as e:
         print(f"[x] Critical Error: {e}")
 
-import sys
 if __name__ == "__main__":
     main()
