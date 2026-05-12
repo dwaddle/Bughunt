@@ -14,12 +14,18 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import time
 
-# Import our custom directory scanner logic
+# Import our custom logic
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 try:
     from directory_scanner import scan_directories
 except ImportError:
-    def scan_directories(url): return []
+    def scan_directories(url, ua_type="desktop"): return []
+
+try:
+    from ai_analyzer import get_ai_insight
+    HAS_AI = True
+except ImportError:
+    HAS_AI = False
 
 # ANSI Color Codes
 class Colors:
@@ -144,37 +150,66 @@ def create_org_report(target_full, xml_file):
                 
                 port_section = [f"*** Port {portid}: {service_name}\n", f"- Product: {product}\n", f"- Version: {version}\n"]
                 
-                # ... (CVE and Exploit logic stays same)
+                # CVEs
+                script_elem = port_elem.find(".//script[@id='vulners']")
+                if script_elem is not None:
+                    console_cves, report_cves, cve_list = parse_vulners_output(script_elem.get('output'))
+                    print(f"    - Potential CVEs Found:")
+                    print(console_cves)
+                    port_section.append("- Potential CVEs:\n#+BEGIN_EXAMPLE\n" + report_cves + "\n#+END_EXAMPLE\n")
+                    
+                    for cve in cve_list[:2]:
+                        exploits = get_exploits(cve_id=cve['id'])
+                        if "Found" in exploits:
+                            port_section.append(f"- Specific Exploit Found for {cve['id']}:\n#+BEGIN_EXAMPLE\n" + exploits + "#+END_EXAMPLE\n")
+                            action_items.append(f"| {cve['label']} | Specific Exploit found for {cve['id']} | Run: ~python3 tools/exploit_matcher.py --cve {cve['id']}~ |")
+                        
+                        if cve['label'] in ['CRITICAL', 'HIGH'] and "Found" not in exploits:
+                            action_items.append(f"| {cve['label']} | CVE Found on port {portid} ({cve['id']}) | Investigate with Exploit-Matcher |")
 
-                # HTTP Specific Actions with "Manual-like" Intelligence
+                # General Exploits
+                if product:
+                    general_exploits = get_exploits(service=product, version=version)
+                    port_section.append("- General Exploit Matcher Output:\n#+BEGIN_EXAMPLE\n" + general_exploits + "#+END_EXAMPLE\n")
+                    if "Found" in general_exploits:
+                        action_items.append(f"| HIGH | Known Exploit for {product} {version} | Run: ~python3 tools/exploit_matcher.py --service '{product}' --version '{version}'~ |")
+
+                # HTTP Specific Actions with AI
                 if service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "5005", "8080"]:
                     url = f"http://{addr}:{portid}"
-                    print(f"    - Performing Intelligent HTML Analysis...")
+                    print(f"    - Performing Intelligent Analysis...")
                     try:
                         res = requests.get(url, timeout=5)
-                        content = res.text.lower()
+                        content = res.text
                         
-                        # Look for hints a human would notice
-                        if "mobile" in content:
+                        # AI Expert Opinion
+                        if HAS_AI:
+                            ai_opinion = get_ai_insight("HTTP Response", content)
+                            port_section.append("- AI Expert Opinion:\n#+BEGIN_QUOTE\n" + ai_opinion + "\n#+END_QUOTE\n")
+                            action_items.append(f"| AI | Contextual Insight on port {portid} | Review AI Expert Opinion in report |")
+
+                        # Manual Hints
+                        if "mobile" in content.lower():
                             print(f"      [!] Hint detected: 'Mobile' mentioned. Retrying Directory Discovery with Mobile UA.")
                             scan_directories(url, ua_type="mobile")
                             action_items.append(f"| HIGH | Mobile-only app detected | Run: ~python3 tools/directory_scanner.py {url} --ua mobile~ |")
                         
-                        if "admin" in content or "login" in content:
+                        if "admin" in content.lower() or "login" in content.lower():
                             action_items.append(f"| CRITICAL | Admin/Login Page found | Run: ~python3 tools/auth_bruter.py {url}/login~ |")
                             
-                    except: pass
+                    except Exception as e:
+                        print(f"      [x] Analysis error: {e}")
 
+                    # Standard Tools
                     print(f"    - Starting Parameter Mining...")
-                    # Run Param-Miner logic (simplified trigger)
                     action_items.append(f"| MEDIUM | Hidden Parameter Discovery | Run: ~python3 tools/param_miner.py {url}/~ |")
                     
-                    # ... rest of HTTP logic
+                    port_section.append(f"- Recommended Scan:\n#+BEGIN_SRC bash\npython3 tools/verbose_checker.py http://{addr}:{portid}/FUZZ\n#+END_SRC\n")
 
                 recon_details.append("".join(port_section))
 
     with open(report_path, "w") as f:
-        f.write(f"#+TITLE: Actionable Recon Report: {target_full}\n")
+        f.write(f"#+TITLE: AI-Powered Recon Report: {target_full}\n")
         f.write(f"#+AUTHOR: Bughunt Master-Recon\n")
         f.write(f"#+DATE: {datetime.now().strftime('[%Y-%m-%d %a]')}\n\n")
         
@@ -193,7 +228,7 @@ def create_org_report(target_full, xml_file):
         for detail in recon_details:
             f.write(detail + "\n")
             
-    print(f"\n[+] Actionable Report generated: {report_path}")
+    print(f"\n[+] AI-Powered Report generated: {report_path}")
     return report_path
 
 def main():
