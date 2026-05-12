@@ -171,6 +171,11 @@ def create_org_report(target_full, xml_file):
 
                 # HTTP Specific Actions
                 if service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "8080"]:
+                    print(f"    - Starting Design & Header Audit...")
+                    design_cmd = f"python3 tools/design_audit.py http://{addr}:{portid}"
+                    subprocess.run(design_cmd, shell=True, capture_output=True)
+                    action_items.append(f"| LOW | Architectural Audit | Run: ~python3 tools/design_audit.py http://{addr}:{portid}~ |")
+
                     print(f"    - Starting Directory Discovery...")
                     dirs = scan_directories(f"http://{addr}:{portid}")
                     if dirs:
@@ -183,6 +188,10 @@ def create_org_report(target_full, xml_file):
                                 action_items.append(f"| MEDIUM | API Endpoint found on port {portid} | Run: ~python3 tools/verbose_checker.py {d['url']}/FUZZ~ |")
                             if "package.json" in d['url'] or "requirements.txt" in d['url']:
                                 action_items.append(f"| HIGH | Dependency file found on port {portid} | Run: ~python3 tools/hunter_sca.py http://{addr}:{portid}~ |")
+                            
+                            # Potential SSRF targets often have 'url=', 'dest=', 'path='
+                            # We can suggest SSRF-Scanner if we find suspicious parameters (logic for future)
+                            action_items.append(f"| MEDIUM | Potential SSRF parameter check | Run: ~python3 tools/ssrf_scanner.py '{d['url']}?url=FUZZ'~ |")
                     
                     port_section.append(f"- Recommended Scan:\n#+BEGIN_SRC bash\npython3 tools/verbose_checker.py http://{addr}:{portid}/FUZZ\n#+END_SRC\n")
 
