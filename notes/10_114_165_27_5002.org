@@ -31,6 +31,8 @@ behavi...
 #+END_EXAMPLE
 - General Exploit Matcher Output:
 #+BEGIN_EXAMPLE
+[*] Searching general exploits for: Werkzeug httpd 3.1.3
+    - No exploits found for Werkzeug httpd 3.1.3.
 #+END_EXAMPLE
 - Recommended Scan:
 #+BEGIN_SRC bash

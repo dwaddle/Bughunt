@@ -27,8 +27,8 @@ AUTH_LISTS = {
 # Fuzzing / Injection Payloads
 PAYLOADS = {
     "lfi": os.path.join(SECLISTS_PATH, "Fuzzing/LFI/LFI-Jhaddix.txt"),
-    "sqli": os.path.join(SECLISTS_PATH, "Fuzzing/SQLi/Generic-SQLi.txt"),
-    "xss": os.path.join(SECLISTS_PATH, "Fuzzing/XSS/XSS-Jhaddix.txt"),
+    "sqli": os.path.join(SECLISTS_PATH, "Fuzzing/Databases/SQLi/Generic-SQLi.txt"),
+    "xss": os.path.join(SECLISTS_PATH, "Fuzzing/XSS/human-friendly/XSS-Jhaddix.txt"),
 }
 
 def get_wordlist(key):
