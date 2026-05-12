@@ -112,8 +112,11 @@ def run_nmap(target, port=None):
     subprocess.run(cmd, shell=True, check=True)
     return xml_file
 
-def get_exploits(service, version):
-    cmd = f"python3 tools/exploit_matcher.py '{service}' --version '{version}'"
+def get_exploits(service=None, version="", cve_id=None):
+    if cve_id:
+        cmd = f"python3 tools/exploit_matcher.py --cve '{cve_id}'"
+    else:
+        cmd = f"python3 tools/exploit_matcher.py --service '{service}' --version '{version}'"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return result.stdout
 
@@ -149,16 +152,22 @@ def create_org_report(target_full, xml_file):
                     print(console_cves)
                     port_section.append("- Potential CVEs:\n#+BEGIN_EXAMPLE\n" + report_cves + "\n#+END_EXAMPLE\n")
                     
-                    for cve in cve_list:
-                        if cve['label'] in ['CRITICAL', 'HIGH']:
+                    # Search specific exploits for the top 2 CVEs to avoid clutter
+                    for cve in cve_list[:2]:
+                        exploits = get_exploits(cve_id=cve['id'])
+                        if "Found" in exploits:
+                            port_section.append(f"- Specific Exploit Found for {cve['id']}:\n#+BEGIN_EXAMPLE\n" + exploits + "#+END_EXAMPLE\n")
+                            action_items.append(f"| {cve['label']} | Specific Exploit found for {cve['id']} | Run: ~python3 tools/exploit_matcher.py --cve {cve['id']}~ |")
+                        
+                        if cve['label'] in ['CRITICAL', 'HIGH'] and "Found" not in exploits:
                             action_items.append(f"| {cve['label']} | CVE Found on port {portid} ({cve['id']}) | Investigate with Exploit-Matcher |")
 
-                # Exploits
+                # General Exploits
                 if product:
-                    exploits = get_exploits(product, version)
-                    port_section.append("- Exploit Matcher Output:\n#+BEGIN_EXAMPLE\n" + exploits + "#+END_EXAMPLE\n")
-                    if "Found" in exploits:
-                        action_items.append(f"| HIGH | Known Exploit for {product} {version} | Run: ~python3 tools/exploit_matcher.py '{product}' --version '{version}'~ |")
+                    general_exploits = get_exploits(service=product, version=version)
+                    port_section.append("- General Exploit Matcher Output:\n#+BEGIN_EXAMPLE\n" + general_exploits + "#+END_EXAMPLE\n")
+                    if "Found" in general_exploits:
+                        action_items.append(f"| HIGH | Known Exploit for {product} {version} | Run: ~python3 tools/exploit_matcher.py --service '{product}' --version '{version}'~ |")
 
                 # HTTP Specific Actions
                 if service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "8080"]:

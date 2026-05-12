@@ -1,13 +1,16 @@
-#+TITLE: Recon Report: 10.114.137.157:5002
+#+TITLE: Actionable Recon Report: 10.114.132.168:5002
 #+AUTHOR: Bughunt Master-Recon
 #+DATE: [2026-05-11 Mon]
 
-* Overview
-- Target: 10.114.137.157:5002
-- Status: Enumerated
+* 🔥 IMMEDIATE ACTION PLAN
+Below are the most critical findings that require immediate attention:
 
-* Reconnaissance
-** Open Ports & Services
+| Severity | Finding | Recommended Action |
+|----------+---------+--------------------|
+| HIGH | CVE Found on port 5002 (CVE-2025-13836) | Investigate with Exploit-Matcher |
+| HIGH | CVE Found on port 5002 (CVE-2026-4519) | Investigate with Exploit-Matcher |
+
+* Reconnaissance Details
 *** Port 5002: http
 - Product: Werkzeug httpd
 - Version: 3.1.3
@@ -15,7 +18,7 @@
 #+BEGIN_EXAMPLE
       cpe:/a:python:python:3.11.14:
       [HIGH] CVE-2025-13836 (Score: 7.5)
-      >> Description lookup failed or unavailable for this CVE.
+      >> When reading an HTTP response from a server, if no read amount is specified, the default behavior will be to use Content-Length. This allows a malicio...
       [HIGH] CVE-2026-4519 (Score: 7.0)
       >> The webbrowser.open() API would accept leading dashes in the URL which 
 could be handled as command line options for certain web browsers. New 
@@ -23,15 +26,13 @@ behavi...
       [MEDIUM] CVE-2025-12781 (Score: 6.3)
       >> When passing data to the b64decode(), standard_b64decode(), and urlsafe_b64decode() functions in the "base64" module the characters "+/" will always b...
       [MEDIUM] CVE-2025-12084 (Score: 6.3)
-      >> Description lookup failed or unavailable for this CVE.
       [MEDIUM] CVE-2025-13837 (Score: 5.5)
-      >> When loading a plist file, the plistlib module reads data in size specified by the file itself, meaning a malicious file can cause OOM and DoS issues
 #+END_EXAMPLE
 - Exploit Matcher Output:
 #+BEGIN_EXAMPLE
 #+END_EXAMPLE
-- Custom Tooling Findings:
+- Recommended Scan:
 #+BEGIN_SRC bash
-python3 tools/verbose_checker.py http://10.114.137.157:5002/FUZZ
+python3 tools/verbose_checker.py http://10.114.132.168:5002/FUZZ
 #+END_SRC
 
