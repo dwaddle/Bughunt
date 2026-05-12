@@ -126,6 +126,25 @@ def get_exploits(service=None, version="", cve_id=None):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return result.stdout
 
+def generate_tactical_plan(findings_summary):
+    if not HAS_AI:
+        return "AI not available for tactical planning."
+
+    print(f"[*] Generating AI Tactical Attack Plan...")
+    prompt = f"""
+    You are a Lead Penetration Tester. Review these findings and provide a 3-step Tactical Attack Plan.
+    Focus on the most likely path to Root/Admin.
+
+    Findings Summary:
+    {findings_summary}
+
+    Structure:
+    - Phase 1: Entry Point (Highest priority)
+    - Phase 2: Exploitation Strategy
+    - Phase 3: Post-Exploitation/Lateral Movement
+    """
+    return get_ai_insight("Tactical Planning", prompt)
+
 def create_org_report(target_full, xml_file):
     safe_name = target_full.replace('.', '_').replace(':', '_')
     report_path = f"notes/{safe_name}.org"
@@ -134,6 +153,7 @@ def create_org_report(target_full, xml_file):
     
     action_items = []
     recon_details = []
+    full_findings_log = []
     
     for host in root.findall('host'):
         addr = host.find('address').get('addr')
@@ -147,6 +167,7 @@ def create_org_report(target_full, xml_file):
                 version = service_elem.get('version', '') if service_elem is not None else ""
                 
                 print(f"[+] {Colors.INFO}Found Port {portid}{Colors.RESET}: {product} {version}")
+                full_findings_log.append(f"Port {portid}: {product} {version}")
                 
                 port_section = [f"*** Port {portid}: {service_name}\n", f"- Product: {product}\n", f"- Version: {version}\n"]
                 
@@ -157,6 +178,9 @@ def create_org_report(target_full, xml_file):
                     print(f"    - Potential CVEs Found:")
                     print(console_cves)
                     port_section.append("- Potential CVEs:\n#+BEGIN_EXAMPLE\n" + report_cves + "\n#+END_EXAMPLE\n")
+                    
+                    for cve in cve_list:
+                        full_findings_log.append(f"  - CVE: {cve['id']} (Score: {cve['score']})")
                     
                     for cve in cve_list[:2]:
                         exploits = get_exploits(cve_id=cve['id'])
@@ -187,6 +211,7 @@ def create_org_report(target_full, xml_file):
                             ai_opinion = get_ai_insight("HTTP Response", content)
                             port_section.append("- AI Expert Opinion:\n#+BEGIN_QUOTE\n" + ai_opinion + "\n#+END_QUOTE\n")
                             action_items.append(f"| AI | Contextual Insight on port {portid} | Review AI Expert Opinion in report |")
+                            full_findings_log.append(f"  - AI Insight for {url}: {ai_opinion[:100]}...")
 
                         # Manual Hints
                         if "mobile" in content.lower():
@@ -208,11 +233,17 @@ def create_org_report(target_full, xml_file):
 
                 recon_details.append("".join(port_section))
 
+    # After collecting all data, generate tactical plan
+    tactical_plan = generate_tactical_plan("\n".join(full_findings_log))
+
     with open(report_path, "w") as f:
         f.write(f"#+TITLE: AI-Powered Recon Report: {target_full}\n")
         f.write(f"#+AUTHOR: Bughunt Master-Recon\n")
         f.write(f"#+DATE: {datetime.now().strftime('[%Y-%m-%d %a]')}\n\n")
         
+        f.write("* 🗺️ AI TACTICAL ATTACK PLAN\n")
+        f.write("#+BEGIN_QUOTE\n" + tactical_plan + "\n#+END_QUOTE\n\n")
+
         f.write("* 🔥 IMMEDIATE ACTION PLAN\n")
         f.write("Below are the most critical findings that require immediate attention:\n\n")
         if action_items:
