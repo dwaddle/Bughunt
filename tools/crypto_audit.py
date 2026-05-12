@@ -9,7 +9,6 @@ import argparse
 import re
 import sys
 from urllib.parse import urljoin
-from bs4 import BeautifulSoup
 
 # Patterns for sensitive data (API keys, secrets, etc.)
 SECRET_PATTERNS = [
@@ -42,20 +41,18 @@ class CryptoAuditor:
             response = requests.get(self.target_url, timeout=10)
             self.check_headers(response.headers)
             
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # 1. Audit internal scripts
-            scripts = soup.find_all('script')
-            for script in scripts:
-                if script.string:
-                    self.scan_content("Internal Script", script.string)
+            # 1. Audit internal scripts found in HTML via regex
+            internal_scripts = re.findall(r'<script\b[^>]*>(.*?)</script>', response.text, re.DOTALL | re.IGNORECASE)
+            for script_content in internal_scripts:
+                if script_content.strip():
+                    self.scan_content("Internal Script", script_content)
                 
-                # 2. Audit external scripts
-                src = script.get('src')
-                if src:
-                    full_src_url = urljoin(self.target_url, src)
-                    if full_src_url not in self.scanned_urls:
-                        self.audit_external_script(full_src_url)
+            # 2. Audit external scripts found in HTML via regex
+            external_scripts = re.findall(r'<script\b[^>]*src=["\']([^"\']+)["\']', response.text, re.IGNORECASE)
+            for src in external_scripts:
+                full_src_url = urljoin(self.target_url, src)
+                if full_src_url not in self.scanned_urls:
+                    self.audit_external_script(full_src_url)
 
         except Exception as e:
             print(f"[x] Error during audit: {e}")

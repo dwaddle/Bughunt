@@ -6,7 +6,6 @@ Part of the Bughunt project (OWASP A04: Insecure Design).
 
 import requests
 import argparse
-from bs4 import BeautifulSoup
 
 # Common design flaws / exposed endpoints
 DESIGN_INDICATORS = {

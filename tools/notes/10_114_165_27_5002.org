@@ -1,6 +1,6 @@
-#+TITLE: Actionable Recon Report: 10.114.132.168:5002
+#+TITLE: Actionable Recon Report: 10.114.165.27:5002
 #+AUTHOR: Bughunt Master-Recon
-#+DATE: [2026-05-11 Mon]
+#+DATE: [2026-05-12 Tue]
 
 * 🔥 IMMEDIATE ACTION PLAN
 Below are the most critical findings that require immediate attention:
@@ -9,6 +9,7 @@ Below are the most critical findings that require immediate attention:
 |----------+---------+--------------------|
 | HIGH | CVE Found on port 5002 (CVE-2025-13836) | Investigate with Exploit-Matcher |
 | HIGH | CVE Found on port 5002 (CVE-2026-4519) | Investigate with Exploit-Matcher |
+| LOW | Architectural Audit | Run: ~python3 tools/design_audit.py http://10.114.165.27:5002~ |
 
 * Reconnaissance Details
 *** Port 5002: http
@@ -28,11 +29,11 @@ behavi...
       [MEDIUM] CVE-2025-12084 (Score: 6.3)
       [MEDIUM] CVE-2025-13837 (Score: 5.5)
 #+END_EXAMPLE
-- Exploit Matcher Output:
+- General Exploit Matcher Output:
 #+BEGIN_EXAMPLE
 #+END_EXAMPLE
 - Recommended Scan:
 #+BEGIN_SRC bash
-python3 tools/verbose_checker.py http://10.114.132.168:5002/FUZZ
+python3 tools/verbose_checker.py http://10.114.165.27:5002/FUZZ
 #+END_SRC
 
