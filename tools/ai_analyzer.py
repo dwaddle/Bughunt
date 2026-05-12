@@ -10,10 +10,10 @@ import argparse
 import sys
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "gemma3:latest" # Using gemma3 for its general reasoning
+MODEL = "gemma3:latest" # Primary model
 
 def get_ai_insight(context_type, data):
-    print(f"[*] Requesting AI insight for {context_type}...")
+    print(f"[*] Requesting AI insight for {context_type} (this may take a minute)...")
     
     prompt = f"""
     You are a Senior Penetration Tester assistant. 
@@ -23,7 +23,7 @@ def get_ai_insight(context_type, data):
     
     Data to analyze:
     ---
-    {data[:2000]}
+    {data[:3000]}
     ---
     Be concise, technical, and actionable. Provide a 3-bullet point summary.
     """
@@ -35,13 +35,18 @@ def get_ai_insight(context_type, data):
     }
     
     try:
-        response = requests.post(OLLAMA_URL, json=payload, timeout=30)
+        # Increased timeout to 120s for local inference
+        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
         if response.status_code == 200:
             return response.json().get('response', "AI could not generate an analysis.")
+        else:
+            return f"Ollama returned error code: {response.status_code}"
+    except requests.exceptions.Timeout:
+        return "AI Analysis timed out. Local inference is taking too long (> 120s)."
+    except requests.exceptions.ConnectionError:
+        return "AI Analysis failed: Cannot connect to Ollama. Is 'ollama serve' running?"
     except Exception as e:
-        return f"AI Analysis failed: Is Ollama running? Error: {e}"
-    
-    return "AI Analysis unavailable."
+        return f"AI Analysis encountered an unexpected error: {e}"
 
 def main():
     parser = argparse.ArgumentParser(description="AI-Analyzer (Ollama)")
