@@ -10,43 +10,46 @@ import argparse
 import sys
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "gemma3:latest" # Primary model
+# Preferred model order (Fastest first)
+MODELS = ["llama3.2:1b", "gemma3:latest", "qwen2.5-coder:latest"]
 
 def get_ai_insight(context_type, data):
-    print(f"[*] Requesting AI insight for {context_type} (this may take a minute)...")
+    print(f"[*] Requesting AI insight (Timeout: 300s). This may take a while on CPU...")
     
+    # Use a very short, specific prompt to reduce token generation time
     prompt = f"""
-    You are a Senior Penetration Tester assistant. 
-    Analyze the following {context_type} and suggest:
-    1. The most likely security vulnerability.
-    2. A specific next step or payload to test it.
+    Task: Pentest Analysis of {context_type}.
+    Rule: Give only 2 bullet points.
+    1. Most likely vulnerability.
+    2. Next test command.
     
-    Data to analyze:
-    ---
-    {data[:3000]}
-    ---
-    Be concise, technical, and actionable. Provide a 3-bullet point summary.
+    Data: {data[:1500]}
     """
     
+    # Try the first model that's available
+    current_model = MODELS[0] 
+    
     payload = {
-        "model": MODEL,
+        "model": current_model,
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        "options": {
+            "num_predict": 100, # Limit the number of tokens to speed up
+            "temperature": 0.3
+        }
     }
     
     try:
-        # Increased timeout to 120s for local inference
-        response = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        # 5 minute timeout for slow hardware
+        response = requests.post(OLLAMA_URL, json=payload, timeout=300)
         if response.status_code == 200:
-            return response.json().get('response', "AI could not generate an analysis.")
+            return response.json().get('response', "AI Analysis empty.")
         else:
-            return f"Ollama returned error code: {response.status_code}"
+            return f"Ollama Error ({response.status_code})"
     except requests.exceptions.Timeout:
-        return "AI Analysis timed out. Local inference is taking too long (> 120s)."
-    except requests.exceptions.ConnectionError:
-        return "AI Analysis failed: Cannot connect to Ollama. Is 'ollama serve' running?"
+        return "AI Analysis timed out after 300s. CPU too slow for this model."
     except Exception as e:
-        return f"AI Analysis encountered an unexpected error: {e}"
+        return f"AI Error: {e}"
 
 def main():
     parser = argparse.ArgumentParser(description="AI-Analyzer (Ollama)")
