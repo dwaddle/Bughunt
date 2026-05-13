@@ -52,9 +52,14 @@ def get_ai_insight(context_type, data):
         return f"AI Error: {e}"
 
 def main():
-    parser = argparse.ArgumentParser(description="AI-Analyzer (Ollama)")
-    parser.add_argument("file", help="File content to analyze")
-    parser.add_argument("--type", default="HTML content", help="Type of data (HTML, Headers, etc.)")
+    parser = argparse.ArgumentParser(
+        description="AI-Analyzer: Leverages local LLMs (Ollama) for intelligent security insights. "
+                    "Maps to OWASP A04:2021-Insecure Design by analyzing configuration, code, or traffic "
+                    "for architectural flaws and logical vulnerabilities."
+    )
+    parser.add_argument("file", help="Path to the file containing data (e.g., HTML, Headers, Config) to analyze")
+    parser.add_argument("--type", default="HTML content", 
+                        help="Specify the type of data (e.g., 'HTML', 'HTTP Headers', 'JS Code') for context-aware analysis")
     args = parser.parse_args()
     
     with open(args.file, 'r') as f:

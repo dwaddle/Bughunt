@@ -77,11 +77,14 @@ def scan_endpoint(url, method="GET", param_name=None):
     return results
 
 def main():
-    parser = argparse.ArgumentParser(description="Verbose-Checker for Bughunt")
-    parser.add_argument("url", help="Target URL (use FUZZ for position in GET requests)")
-    parser.add_argument("--method", default="GET", choices=["GET", "POST"], help="HTTP method (default: GET)")
-    parser.add_argument("--param", help="Parameter name for POST requests (default: data)")
-    parser.add_argument("--output", help="Save results to JSON file")
+    parser = argparse.ArgumentParser(
+        description="Verbose-Checker: Identifies verbose error messages and hidden debug endpoints (related to OWASP A05:2021-Security Misconfiguration). "
+                    "Triggers errors and scans for sensitive leaks like stack traces, API keys, or internal flags."
+    )
+    parser.add_argument("url", help="Target URL to probe. Use 'FUZZ' to specify the position for GET requests (e.g., 'http://site.com/api/FUZZ')")
+    parser.add_argument("--method", default="GET", choices=["GET", "POST"], help="HTTP method to use for requests (default: GET)")
+    parser.add_argument("--param", help="Parameter name to use for POST requests (default: 'data' if not specified)")
+    parser.add_argument("--output", help="Path to a JSON file where findings will be saved")
 
     args = parser.parse_args()
 

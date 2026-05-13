@@ -57,10 +57,13 @@ class NucleiScanner:
         })
 
 def main():
-    parser = argparse.ArgumentParser(description="Nuclei-Scanner for Bughunt")
-    parser.add_argument("url", help="Target URL")
-    parser.add_argument("--severity", help="Filter by severity (critical, high, medium, low)")
-    parser.add_argument("--tags", help="Filter by tags (cve, exposure, misconfig, etc.)")
+    parser = argparse.ArgumentParser(
+        description="Nuclei-Scanner: Template-based vulnerability scanner (OWASP A06:2021-Vulnerable and Outdated Components). "
+                    "Identifies misconfigurations, exposures, and known vulnerabilities using a vast library of templates."
+    )
+    parser.add_argument("url", help="Target URL to scan with Nuclei")
+    parser.add_argument("--severity", help="Filter findings by severity (choices: critical, high, medium, low, info)")
+    parser.add_argument("--tags", help="Filter templates by specific tags (e.g., 'cve,exposure,misconfig,tech')")
     
     args = parser.parse_args()
     

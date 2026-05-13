@@ -59,12 +59,16 @@ def scan_directories(url, wordlist_path=None, fast=True, limit=200, ua_type="des
     return found
 
 def main():
-    parser = argparse.ArgumentParser(description="Directory-Scanner for Bughunt")
-    parser.add_argument("url", help="Target Base URL")
-    parser.add_argument("--wordlist", help="Path to wordlist file")
-    parser.add_argument("--full", action="store_true", help="Run a fuller scan")
-    parser.add_argument("--limit", type=int, default=200, help="Limit entries")
-    parser.add_argument("--ua", default="desktop", choices=["desktop", "mobile", "bot"], help="User-Agent type")
+    parser = argparse.ArgumentParser(
+        description="Directory-Scanner: A fast, focused tool for discovering hidden directories and API endpoints. "
+                    "Identifies forgotten assets, sensitive paths, and potential entry points for further testing."
+    )
+    parser.add_argument("url", help="Target Base URL where the directory scan will start")
+    parser.add_argument("--wordlist", help="Path to a custom wordlist file for directory discovery")
+    parser.add_argument("--full", action="store_true", help="Perform a more comprehensive scan using the default project wordlist")
+    parser.add_argument("--limit", type=int, default=200, help="Maximum number of wordlist entries to test (default: 200)")
+    parser.add_argument("--ua", default="desktop", choices=["desktop", "mobile", "bot"], 
+                        help="Specify the User-Agent type to use for requests (default: desktop)")
     
     args = parser.parse_args()
     w_path = args.wordlist if args.wordlist else (DEFAULT_WORDLIST if args.full else None)

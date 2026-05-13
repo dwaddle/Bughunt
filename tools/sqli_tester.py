@@ -79,10 +79,13 @@ def scan_sqli(url, wordlist_path=None):
     return found
 
 def main():
-    parser = argparse.ArgumentParser(description="SQLi-Tester (OWASP A03)")
-    parser.add_argument("url", help="Target URL with FUZZ keyword")
-    parser.add_argument("--wordlist", help="Custom SQLi wordlist")
-    parser.add_argument("--full", action="store_true", help="Use SecLists SQLi wordlist")
+    parser = argparse.ArgumentParser(
+        description="SQLi-Tester: Identifies SQL Injection vulnerabilities (OWASP A03:2021-Injection). "
+                    "Probes for error-based SQL injection by injecting common payloads and monitoring for database error messages."
+    )
+    parser.add_argument("url", help="Target URL with the 'FUZZ' keyword in the vulnerable parameter (e.g., 'http://target.com/api?id=FUZZ')")
+    parser.add_argument("--wordlist", help="Path to a custom wordlist of SQLi payloads")
+    parser.add_argument("--full", action="store_true", help="Use the project's default SecLists-based SQLi payload list")
 
     args = parser.parse_args()
     w_path = args.wordlist if args.wordlist else (PAYLOADS.get("sqli") if args.full else None)

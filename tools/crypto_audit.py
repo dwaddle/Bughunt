@@ -101,8 +101,11 @@ class CryptoAuditor:
             self.findings.append(finding)
 
 def main():
-    parser = argparse.ArgumentParser(description="Crypto-Audit (OWASP A02)")
-    parser.add_argument("url", help="Target URL to audit")
+    parser = argparse.ArgumentParser(
+        description="Crypto-Audit: Identifies Cryptographic Failures and Insecure Storage (OWASP A02:2021-Cryptographic Failures). "
+                    "Scans for hardcoded secrets, weak cryptographic algorithms, and insecure client-side storage mechanisms."
+    )
+    parser.add_argument("url", help="Target URL to audit for cryptographic and storage weaknesses")
     args = parser.parse_args()
 
     auditor = CryptoAuditor(args.url)

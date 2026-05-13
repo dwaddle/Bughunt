@@ -80,9 +80,12 @@ class HunterSCA:
         self.findings.append({"severity": severity, "title": title, "source": source})
 
 def main():
-    parser = argparse.ArgumentParser(description="Hunter-SCA (OWASP A08)")
-    parser.add_argument("url", help="Base URL of the target web app")
-    parser.add_argument("--scan-all", action="store_true", help="Scan for all common dependency files")
+    parser = argparse.ArgumentParser(
+        description="Hunter-SCA: Software Composition Analysis (OWASP A08:2021-Software and Data Integrity Failures). "
+                    "Identifies vulnerabilities in third-party components by scanning for exposed dependency files."
+    )
+    parser.add_argument("url", help="Base URL of the target web application to scan for exposed dependency files")
+    parser.add_argument("--scan-all", action="store_true", help="Scan for all common dependency files (e.g., requirements.txt, package.json, composer.json)")
     args = parser.parse_args()
 
     sca = HunterSCA(args.url)

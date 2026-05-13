@@ -98,10 +98,13 @@ def scan_lfi(url, wordlist_path=None):
     return found_vulnerabilities
 
 def main():
-    parser = argparse.ArgumentParser(description="LFI-Scanner (OWASP A03)")
-    parser.add_argument("url", help="Target URL with FUZZ keyword (e.g. http://site.com/view?file=FUZZ)")
-    parser.add_argument("--wordlist", help="Optional path to custom LFI wordlist")
-    parser.add_argument("--full", action="store_true", help="Use full SecLists LFI wordlist")
+    parser = argparse.ArgumentParser(
+        description="LFI-Scanner: Identifies Local File Inclusion vulnerabilities (OWASP A03:2021-Injection). "
+                    "Tests for the ability to include local files or use PHP wrappers, which can lead to RCE or data exposure."
+    )
+    parser.add_argument("url", help="Target URL with the 'FUZZ' keyword in the vulnerable parameter (e.g., 'http://site.com/view?file=FUZZ')")
+    parser.add_argument("--wordlist", help="Path to a custom wordlist of LFI payloads")
+    parser.add_argument("--full", action="store_true", help="Use the project's default SecLists-based LFI payload list")
 
     args = parser.parse_args()
 

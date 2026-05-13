@@ -50,8 +50,11 @@ class DesignAuditor:
         self.findings.append({"severity": severity, "title": title})
 
 def main():
-    parser = argparse.ArgumentParser(description="Design-Audit (OWASP A04)")
-    parser.add_argument("url", help="Target Base URL")
+    parser = argparse.ArgumentParser(
+        description="Design-Audit: Identifies Insecure Design and architectural flaws (OWASP A04:2021-Insecure Design). "
+                    "Checks for missing security headers, exposed documentation (like Swagger), and sensitive development or backup files."
+    )
+    parser.add_argument("url", help="Target Base URL to audit for design-level flaws")
     args = parser.parse_args()
     
     auditor = DesignAuditor(args.url)

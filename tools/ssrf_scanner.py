@@ -52,8 +52,11 @@ def scan_ssrf(url):
     return found
 
 def main():
-    parser = argparse.ArgumentParser(description="SSRF-Scanner (OWASP A10)")
-    parser.add_argument("url", help="Target URL with FUZZ keyword")
+    parser = argparse.ArgumentParser(
+        description="SSRF-Scanner: Identifies Server-Side Request Forgery vulnerabilities (OWASP A10:2021-SSRF). "
+                    "Tests for the ability to make the server perform unintended requests to internal services, cloud metadata, or local files."
+    )
+    parser.add_argument("url", help="Target URL with the 'FUZZ' keyword in the vulnerable parameter (e.g., 'http://target.com/proxy?url=FUZZ')")
     args = parser.parse_args()
     scan_ssrf(args.url)
 

@@ -283,8 +283,12 @@ def create_org_report(target_full, xml_file):
     return report_path
 
 def main():
-    parser = argparse.ArgumentParser(description="Master-Recon Orchestrator")
-    parser.add_argument("target", help="Target IP, hostname or IP:Port")
+    parser = argparse.ArgumentParser(
+        description="Master-Recon: The central orchestrator for the Bughunt reconnaissance phase. "
+                    "Performs Nmap scans, service versioning, and automatically triggers specialized "
+                    "scanners to generate a Tactical Attack Plan and Org-mode report."
+    )
+    parser.add_argument("target", help="Target IP address, hostname, or IP:Port combination (e.g., '192.168.1.1', 'site.com:8080')")
     args = parser.parse_args()
 
     target = args.target

@@ -46,9 +46,12 @@ def mine_parameters(url, method="GET"):
     return found
 
 def main():
-    parser = argparse.ArgumentParser(description="Param-Miner (OWASP A01)")
-    parser.add_argument("url", help="Target URL")
-    parser.add_argument("--method", default="GET", choices=["GET", "POST"], help="HTTP method")
+    parser = argparse.ArgumentParser(
+        description="Param-Miner: Identifies hidden or unlinked HTTP parameters (OWASP A01:2021-Broken Access Control). "
+                    "Detects parameters that change application behavior by analyzing response length variations."
+    )
+    parser.add_argument("url", help="Target URL to probe for hidden parameters")
+    parser.add_argument("--method", default="GET", choices=["GET", "POST"], help="HTTP method to use for parameter mining (default: GET)")
     args = parser.parse_args()
     mine_parameters(args.url, args.method)
 

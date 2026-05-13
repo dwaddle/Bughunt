@@ -69,13 +69,16 @@ def test_auth(url, username_field, password_field, method="POST", wordlist=None)
     return None
 
 def main():
-    parser = argparse.ArgumentParser(description="Auth-Bruter for Bughunt")
-    parser.add_argument("url", help="Target login URL")
-    parser.add_argument("--user-field", default="username", help="Username field name")
-    parser.add_argument("--pass-field", default="password", help="Password field name")
-    parser.add_argument("--method", default="POST", choices=["GET", "POST"], help="HTTP method")
-    parser.add_argument("--wordlist", help="Path to credentials wordlist")
-    parser.add_argument("--full", action="store_true", help="Use default SecLists credentials")
+    parser = argparse.ArgumentParser(
+        description="Auth-Bruter: Tests for broken authentication (OWASP A07:2021-Identification and Authentication Failures). "
+                    "Tests for default credentials and weak passwords against web login forms."
+    )
+    parser.add_argument("url", help="Target URL of the login form")
+    parser.add_argument("--user-field", default="username", help="The name of the HTML input field for the username")
+    parser.add_argument("--pass-field", default="password", help="The name of the HTML input field for the password")
+    parser.add_argument("--method", default="POST", choices=["GET", "POST"], help="HTTP method to use for the login request")
+    parser.add_argument("--wordlist", help="Path to a custom credentials wordlist (format: 'user:pass' or 'pass')")
+    parser.add_argument("--full", action="store_true", help="Use the project's default SecLists-based credential lists")
 
     args = parser.parse_args()
     

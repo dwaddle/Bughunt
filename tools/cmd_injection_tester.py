@@ -65,8 +65,11 @@ def scan_cmd_injection(url):
     return found
 
 def main():
-    parser = argparse.ArgumentParser(description="Cmd-Injection-Tester (OWASP A03)")
-    parser.add_argument("url", help="Target URL with FUZZ keyword")
+    parser = argparse.ArgumentParser(
+        description="Cmd-Injection-Tester: Identifies OS Command Injection vulnerabilities (OWASP A03:2021-Injection). "
+                    "Probes for weaknesses where unsafe user-supplied data is passed to a system shell."
+    )
+    parser.add_argument("url", help="Target URL with the 'FUZZ' keyword in the vulnerable parameter (e.g., 'http://target.com/api?cmd=FUZZ')")
 
     args = parser.parse_args()
     scan_cmd_injection(args.url)
