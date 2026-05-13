@@ -27,6 +27,12 @@ try:
 except ImportError:
     HAS_AI = False
 
+try:
+    from nuclei_scanner import NucleiScanner
+    HAS_NUCLEI = True
+except ImportError:
+    HAS_NUCLEI = False
+
 # ANSI Color Codes
 class Colors:
     CRITICAL = '\033[91m\033[1m' # Bold Red
@@ -197,6 +203,20 @@ def create_org_report(target_full, xml_file):
                     port_section.append("- General Exploit Matcher Output:\n#+BEGIN_EXAMPLE\n" + general_exploits + "#+END_EXAMPLE\n")
                     if "Found" in general_exploits:
                         action_items.append(f"| HIGH | Known Exploit for {product} {version} | Run: ~python3 tools/exploit_matcher.py --service '{product}' --version '{version}'~ |")
+
+                # Nuclei Scan
+                if HAS_NUCLEI and (service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "5005", "8080"]):
+                    url = f"http://{addr}:{portid}"
+                    print(f"    - Running Nuclei breedte-scan...")
+                    scanner = NucleiScanner(url)
+                    nuclei_findings = scanner.run_scan(severity="critical,high,medium")
+                    
+                    if nuclei_findings:
+                        port_section.append("- Nuclei Findings:\n")
+                        for f in nuclei_findings:
+                            port_section.append(f"  - [{f['severity']}] {f['name']} ({f['matched']})\n")
+                            action_items.append(f"| {f['severity']} | Nuclei Hit: {f['name']} | Target: {f['matched']} |")
+                            full_findings_log.append(f"  - Nuclei hit on {portid}: {f['name']}")
 
                 # HTTP Specific Actions with AI
                 if service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "5005", "8080"]:

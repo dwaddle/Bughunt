@@ -10,8 +10,8 @@ Dit project is gericht op het systematisch identificeren en exploiteren van kwet
 | **A02: Cryptographic Failures** | Zwakke encryptie of hardcoded keys. | `Crypto-Audit` | ✅ Actief |
 | **A03: Injection** | SQL, NoSQL, OS Command, LFI/RFI. | `LFI-Scanner`, `SQLi-Tester`, `Cmd-Injection-Tester` | ✅ Actief |
 | **A04: Insecure Design** | Ontwerpfouten in de applicatielogica. | `Design-Audit` | ✅ Actief |
-| **A05: Security Misconfiguration** | Verbose errors, default accounts. | `Verbose-Checker` / `Auth-Bruter` | ✅ Actief |
-| **A06: Outdated Components** | Gebruik van software met bekende CVE's. | `Exploit-Matcher` | ✅ Actief |
+| **A05: Security Misconfiguration** | Verbose errors, default accounts, exposed headers. | `Verbose-Checker`, `Auth-Bruter`, `Nuclei-Scanner` | ✅ Actief |
+| **A06: Outdated Components** | Gebruik van software met bekende CVE's. | `Exploit-Matcher`, `Nuclei-Scanner` | ✅ Actief |
 | **A07: Identification & Auth** | Zwakke inlogmechanismen/sessies. | `Auth-Bruter` | ✅ Actief |
 | **A08: Software & Data Integrity** | Supply chain failures, onveilige updates. | `Hunter-SCA` | ✅ Actief |
 | **A09: Logging & Monitoring** | Gebrek aan detectie van aanvallen. | *Offensive Scope (Headers/Logs)* | ✅ Actief |
