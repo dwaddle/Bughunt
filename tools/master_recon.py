@@ -41,7 +41,20 @@ class Colors:
     LOW = '\033[92m'             # Green
     INFO = '\033[94m'            # Blue
     DIM = '\033[90m'             # Gray
+    HEADER = '\033[95m\033[1m'   # Bold Magenta
+    SUCCESS = '\033[92m\033[1m'  # Bold Green
     RESET = '\033[0m'
+
+def print_banner():
+    banner = f"""
+{Colors.HEADER}  ____                _                      _   
+ | __ ) _   _  __ _  | |__  _   _ _ __   ___| |_ 
+ |  _ \| | | |/ _` | | '_ \| | | | '_ \ / _ \ __|
+ | |_) | |_| | (_| | | | | | |_| | | | |  __/ |_ 
+ |____/ \__,_|\__, | |_| |_|\__,_|_| |_|\___|\__|
+              |___/      {Colors.RESET}{Colors.INFO}Master-Recon v2.0{Colors.RESET}
+    """
+    print(banner)
 
 def get_severity(score):
     try:
@@ -119,7 +132,7 @@ def parse_vulners_output(output):
 def run_nmap(target, port=None):
     xml_file = "nmap_results.xml"
     port_arg = f"-p {port}" if port else ""
-    print(f"[*] Running Nmap scan on {target} {f'port {port}' if port else 'common ports'}...")
+    print(f"[*] {Colors.INFO}Running Nmap scan{Colors.RESET} on {Colors.HEADER}{target}{Colors.RESET} {f'port {port}' if port else 'common ports'}...")
     cmd = f"nmap -sV --script vulners -T4 {port_arg} -oX {xml_file} {target}"
     subprocess.run(cmd, shell=True, check=True)
     return xml_file
@@ -136,7 +149,7 @@ def generate_tactical_plan(findings_summary):
     if not HAS_AI:
         return "AI not available for tactical planning."
 
-    print(f"[*] Generating AI Tactical Attack Plan...")
+    print(f"[*] {Colors.HEADER}Generating AI Tactical Attack Plan...{Colors.RESET}")
     prompt = f"""
     You are a Lead Penetration Tester. Review these findings and provide a 3-step Tactical Attack Plan.
     Focus on the most likely path to Root/Admin.
@@ -161,6 +174,7 @@ def create_org_report(target_full, xml_file):
     recon_details = []
     full_findings_log = []
     
+    print(f"\n{Colors.HEADER}--- RECONNAISSANCE RESULTS ---{Colors.RESET}")
     for host in root.findall('host'):
         addr = host.find('address').get('addr')
         for port_elem in host.findall('.//port'):
@@ -172,7 +186,7 @@ def create_org_report(target_full, xml_file):
                 product = service_elem.get('product', '') if service_elem is not None else ""
                 version = service_elem.get('version', '') if service_elem is not None else ""
                 
-                print(f"[+] {Colors.INFO}Found Port {portid}{Colors.RESET}: {product} {version}")
+                print(f"\n[+] {Colors.INFO}Found Port {portid}{Colors.RESET}: {Colors.HEADER}{product} {version}{Colors.RESET}")
                 full_findings_log.append(f"Port {portid}: {product} {version}")
                 
                 port_section = [f"*** Port {portid}: {service_name}\n", f"- Product: {product}\n", f"- Version: {version}\n"]
@@ -181,7 +195,7 @@ def create_org_report(target_full, xml_file):
                 script_elem = port_elem.find(".//script[@id='vulners']")
                 if script_elem is not None:
                     console_cves, report_cves, cve_list = parse_vulners_output(script_elem.get('output'))
-                    print(f"    - Potential CVEs Found:")
+                    print(f"    {Colors.MEDIUM}Potential CVEs Found:{Colors.RESET}")
                     print(console_cves)
                     port_section.append("- Potential CVEs:\n#+BEGIN_EXAMPLE\n" + report_cves + "\n#+END_EXAMPLE\n")
                     
@@ -191,6 +205,7 @@ def create_org_report(target_full, xml_file):
                     for cve in cve_list[:2]:
                         exploits = get_exploits(cve_id=cve['id'])
                         if "Found" in exploits:
+                            print(f"    {Colors.SUCCESS}[!] Specific Exploit Found for {cve['id']}{Colors.RESET}")
                             port_section.append(f"- Specific Exploit Found for {cve['id']}:\n#+BEGIN_EXAMPLE\n" + exploits + "#+END_EXAMPLE\n")
                             action_items.append(f"| {cve['label']} | Specific Exploit found for {cve['id']} | Run: ~python3 tools/exploit_matcher.py --cve {cve['id']}~ |")
                         
@@ -202,12 +217,13 @@ def create_org_report(target_full, xml_file):
                     general_exploits = get_exploits(service=product, version=version)
                     port_section.append("- General Exploit Matcher Output:\n#+BEGIN_EXAMPLE\n" + general_exploits + "#+END_EXAMPLE\n")
                     if "Found" in general_exploits:
+                        print(f"    {Colors.SUCCESS}[!] General Exploits Found for {product}{Colors.RESET}")
                         action_items.append(f"| HIGH | Known Exploit for {product} {version} | Run: ~python3 tools/exploit_matcher.py --service '{product}' --version '{version}'~ |")
 
                 # Nuclei Scan
                 if HAS_NUCLEI and (service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "5005", "8080"]):
                     url = f"http://{addr}:{portid}"
-                    print(f"    - Running Nuclei breedte-scan...")
+                    print(f"    [*] {Colors.INFO}Running Nuclei breedte-scan...{Colors.RESET}")
                     scanner = NucleiScanner(url)
                     nuclei_findings = scanner.run_scan(severity="critical,high,medium")
                     
@@ -221,7 +237,7 @@ def create_org_report(target_full, xml_file):
                 # HTTP Specific Actions with AI
                 if service_name == "http" or portid in ["80", "443", "5002", "5003", "5004", "5005", "8080"]:
                     url = f"http://{addr}:{portid}"
-                    print(f"    - Performing Intelligent Analysis...")
+                    print(f"    [*] {Colors.INFO}Performing Intelligent Analysis...{Colors.RESET}")
                     try:
                         res = requests.get(url, timeout=5)
                         content = res.text
@@ -229,24 +245,26 @@ def create_org_report(target_full, xml_file):
                         # AI Expert Opinion
                         if HAS_AI:
                             ai_opinion = get_ai_insight("HTTP Response", content)
+                            print(f"    {Colors.SUCCESS}[!] AI Insight received{Colors.RESET}")
                             port_section.append("- AI Expert Opinion:\n#+BEGIN_QUOTE\n" + ai_opinion + "\n#+END_QUOTE\n")
                             action_items.append(f"| AI | Contextual Insight on port {portid} | Review AI Expert Opinion in report |")
                             full_findings_log.append(f"  - AI Insight for {url}: {ai_opinion[:100]}...")
 
                         # Manual Hints
                         if "mobile" in content.lower():
-                            print(f"      [!] Hint detected: 'Mobile' mentioned. Retrying Directory Discovery with Mobile UA.")
+                            print(f"      {Colors.MEDIUM}[!] Hint detected: 'Mobile' mentioned.{Colors.RESET} Retrying Directory Discovery with Mobile UA.")
                             scan_directories(url, ua_type="mobile")
                             action_items.append(f"| HIGH | Mobile-only app detected | Run: ~python3 tools/directory_scanner.py {url} --ua mobile~ |")
                         
                         if "admin" in content.lower() or "login" in content.lower():
+                            print(f"      {Colors.CRITICAL}[!] Hint detected: Login/Admin elements found.{Colors.RESET}")
                             action_items.append(f"| CRITICAL | Admin/Login Page found | Run: ~python3 tools/auth_bruter.py {url}/login~ |")
                             
                     except Exception as e:
-                        print(f"      [x] Analysis error: {e}")
+                        print(f"      {Colors.HIGH}[x] Analysis error: {e}{Colors.RESET}")
 
                     # Standard Tools
-                    print(f"    - Starting Parameter Mining...")
+                    print(f"    [*] {Colors.INFO}Starting Parameter Mining...{Colors.RESET}")
                     action_items.append(f"| MEDIUM | Hidden Parameter Discovery | Run: ~python3 tools/param_miner.py {url}/~ |")
                     
                     port_section.append(f"- Recommended Scan:\n#+BEGIN_SRC bash\npython3 tools/verbose_checker.py http://{addr}:{portid}/FUZZ\n#+END_SRC\n")
@@ -255,6 +273,7 @@ def create_org_report(target_full, xml_file):
 
     # After collecting all data, generate tactical plan
     tactical_plan = generate_tactical_plan("\n".join(full_findings_log))
+    print(f"\n{Colors.SUCCESS}[+] Tactical Attack Plan Generated!{Colors.RESET}")
 
     with open(report_path, "w") as f:
         f.write(f"#+TITLE: AI-Powered Recon Report: {target_full}\n")
@@ -279,10 +298,11 @@ def create_org_report(target_full, xml_file):
         for detail in recon_details:
             f.write(detail + "\n")
             
-    print(f"\n[+] AI-Powered Report generated: {report_path}")
+    print(f"\n[+] {Colors.SUCCESS}AI-Powered Report generated{Colors.RESET}: {Colors.HEADER}{report_path}{Colors.RESET}")
     return report_path
 
 def main():
+    print_banner()
     parser = argparse.ArgumentParser(
         description="Master-Recon: The central orchestrator for the Bughunt reconnaissance phase. "
                     "Performs Nmap scans, service versioning, and automatically triggers specialized "
@@ -301,9 +321,9 @@ def main():
             os.makedirs("notes")
         xml_output = run_nmap(target, port)
         report_file = create_org_report(args.target, xml_output)
-        print(f"\n[*] Reconnaissance phase completed. Review {report_file}")
+        print(f"\n[*] {Colors.SUCCESS}Reconnaissance phase completed.{Colors.RESET} Review {Colors.HEADER}{report_file}{Colors.RESET}")
     except Exception as e:
-        print(f"[x] Critical Error: {e}")
+        print(f"[{Colors.CRITICAL}x{Colors.RESET}] {Colors.CRITICAL}Critical Error: {e}{Colors.RESET}")
 
 if __name__ == "__main__":
     main()
