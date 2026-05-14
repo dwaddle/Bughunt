@@ -39,29 +39,28 @@ def get_as_info(domain):
     return None
 
 def get_subdomains(domain, out_of_scope=[]):
-    print(f"[*] {Colors.BLUE}Enumerating related domains{Colors.RESET} (via crt.sh)...")
+    print(f"[*] {Colors.BLUE}Enumerating related domains{Colors.RESET} (via crt.sh - this can take a while for large domains)...")
     subdomains = set()
     try:
+        # Query crt.sh for SSL certificates with a much larger timeout
         url = f"https://crt.sh/?q=%25.{domain}&output=json"
-        response = requests.get(url, timeout=20)
+        response = requests.get(url, timeout=60) # Increased to 60s
         if response.status_code == 200:
             data = response.json()
             for entry in data:
                 name = entry['name_value'].lower()
                 for part in name.split('\n'):
-                    if not part.startswith('*.'): 
+                    # Basic cleaning
+                    part = part.strip().replace('*.', '')
+                    if part and domain in part:
                         subdomains.add(part)
             
             if subdomains:
-                print(f"    - Found {Colors.GREEN}{len(subdomains)}{Colors.RESET} unique related domains!")
-                for sub in sorted(subdomains):
-                    # Check if domain is out of scope
-                    is_oos = any(pattern in sub for pattern in out_of_scope)
-                    if is_oos:
-                        print(f"      {Colors.RED}[OUT OF SCOPE] > {sub}{Colors.RESET}")
-                    else:
-                        print(f"      {Colors.GREEN}[IN SCOPE]     > {sub}{Colors.RESET}")
-                return list(subdomains)
+                sorted_subs = sorted(list(subdomains))
+                print(f"    - Found {Colors.GREEN}{len(sorted_subs)}{Colors.RESET} unique related domains!")
+                return sorted_subs
+    except requests.exceptions.Timeout:
+        print(f"    {Colors.YELLOW}[!] crt.sh timed out. Domain might be too large for a single request.{Colors.RESET}")
     except Exception as e:
         print(f"    {Colors.RED}[x] Error fetching subdomains: {e}{Colors.RESET}")
     return []
@@ -71,13 +70,38 @@ def main():
         description="Domain-Explorer: Identifies AS number and discovers subdomains for a target domain."
     )
     parser.add_argument("domain", help="Target domain (e.g., 'example.com')")
-    parser.add_argument("--out-of-scope", "-oos", help="Comma-separated list of OOS domains or keywords")
+    parser.add_argument("--out-of-scope", "-oos", help="Comma-separated list OR path to a text file with OOS domains/keywords")
+    parser.add_argument("--output", "-o", help="Save the list of IN SCOPE domains to a file")
     args = parser.parse_args()
 
-    oos_list = args.out_of_scope.split(",") if args.out_of_scope else []
+    # Load OOS from file or string
+    oos_list = []
+    if args.out_of_scope:
+        if os.path.exists(args.out_of_scope):
+            with open(args.out_of_scope, 'r') as f:
+                oos_list = [line.strip().lower() for line in f if line.strip()]
+        else:
+            oos_list = [item.strip().lower() for item in args.out_of_scope.split(",")]
 
     get_as_info(args.domain)
-    get_subdomains(args.domain, out_of_scope=oos_list)
+    all_subs = get_subdomains(args.domain, out_of_scope=oos_list)
+    
+    in_scope_subs = []
+    if all_subs:
+        print(f"\n{Colors.HEADER}--- DOMAIN INVENTORY ---{Colors.RESET}")
+        for sub in all_subs:
+            is_oos = any(pattern in sub for pattern in oos_list)
+            if is_oos:
+                print(f"      {Colors.RED}[OUT OF SCOPE] > {sub}{Colors.RESET}")
+            else:
+                print(f"      {Colors.GREEN}[IN SCOPE]     > {sub}{Colors.RESET}")
+                in_scope_subs.append(sub)
+
+    if args.output and in_scope_subs:
+        with open(args.output, 'w') as f:
+            for sub in in_scope_subs:
+                f.write(sub + "\n")
+        print(f"\n[+] {Colors.SUCCESS}In-scope domains saved to{Colors.RESET}: {args.output}")
 
 if __name__ == "__main__":
     main()
